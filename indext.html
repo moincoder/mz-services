@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MZ Internet Services - Bill Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles to improve image quality from html2canvas */
+        #bill-output {
+            transform-origin: top left;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen py-8">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+        <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            
+            <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
+                <strong class="font-bold">Error!</strong>
+                <span class="block sm:inline" id="error-text"></span>
+            </div>
+
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">MZ Internet Services</h1>
+                <p class="text-gray-500 mt-2">Customer Bill Generator</p>
+            </div>
+
+            <!-- Bill Generation Form -->
+            <div id="bill-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Customer Name -->
+                <div>
+                    <label for="customerName" class="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
+                    <input type="text" id="customerName" placeholder="e.g., Ahmed Ali" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                
+                <!-- Internet Package -->
+                <div>
+                    <label for="internetPackage" class="block text-sm font-medium text-gray-700 mb-1">Internet Package (Only Number)</label>
+                    <input type="number" id="internetPackage" placeholder="e.g., 10" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                
+                <!-- Bill Month -->
+                <div>
+                    <label for="billMonth" class="block text-sm font-medium text-gray-700 mb-1">Bill Month</label>
+                    <input type="month" id="billMonth" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                
+                <!-- Total Bill -->
+                <div>
+                    <label for="totalBill" class="block text-sm font-medium text-gray-700 mb-1">Total Bill (PKR)</label>
+                    <input type="number" id="totalBill" placeholder="Enter total amount" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+
+                <!-- Note -->
+                <div class="md:col-span-2">
+                    <label for="billNote" class="block text-sm font-medium text-gray-700 mb-1">Note (Optional)</label>
+                    <textarea id="billNote" rows="3" placeholder="Add any special notes here..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></textarea>
+                </div>
+
+                <!-- Generate Bill Button -->
+                <div class="md:col-span-2 text-center mt-4">
+                    <button id="generateBtn" class="w-full md:w-auto bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-transform transform hover:scale-105">
+                        Generate Bill
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generated Bill Output Section -->
+        <div id="bill-output-container" class="bg-white rounded-xl shadow-lg mt-8 hidden">
+             <div id="bill-output" class="bg-white p-10">
+                <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 border-b-2 border-gray-200">
+                    <div class="flex items-center gap-4">
+                        <div class="h-14 w-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+                            <svg class="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-800">MZ Internet Services</h2>
+                            <p class="text-sm text-gray-500">High Speed Internet Provider</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 sm:mt-0 text-left sm:text-right">
+                         <h2 class="text-2xl sm:text-3xl font-bold text-blue-600">INVOICE</h2>
+                    </div>
+                </header>
+
+                <main class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                    <div>
+                        <h3 class="font-semibold text-gray-800 text-lg mb-2">Bill To:</h3>
+                        <p id="outputCustomerName" class="text-gray-600 text-lg"></p>
+                    </div>
+                    <div class="text-left md:text-right">
+                        <p class="text-gray-600"><strong class="text-gray-800">Bill Month:</strong> <span id="outputBillMonth"></span></p>
+                        <p class="text-gray-600 mt-1"><strong class="text-gray-800">Generation Date:</strong> <span id="outputGenerationDate"></span></p>
+                    </div>
+                </main>
+
+                <section class="mt-10">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="p-3 font-semibold text-gray-700 rounded-l-lg">Description</th>
+                                    <th class="p-3 font-semibold text-gray-700 text-right rounded-r-lg">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100">
+                                    <td id="outputPackage" class="p-3 text-gray-600"></td>
+                                    <td id="outputAmount" class="p-3 text-gray-800 font-medium text-right"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                
+                <section id="outputNoteSection" class="mt-8 hidden">
+                    <h4 class="font-semibold text-gray-700 mb-2">Notes:</h4>
+                    <p id="outputNote" class="text-gray-600 text-sm p-3 bg-gray-50 rounded-lg"></p>
+                </section>
+
+                <footer class="mt-10 pt-6 border-t-2 border-gray-200">
+                    <div class="flex justify-end items-center">
+                        <div>
+                           <p class="text-gray-500 text-sm">Total Amount</p>
+                           <p id="outputTotal" class="text-3xl sm:text-4xl font-bold text-gray-800 text-right"></p>
+                        </div>
+                    </div>
+                    <div class="mt-8 text-center text-gray-500 text-sm">
+                        <p>Thank you for choosing our services.</p>
+                        <p>For any questions, please contact: <strong class="text-gray-700">0308-9002928</strong> or <strong class="text-gray-700">0309-7104830</strong></p>
+                    </div>
+                </footer>
+            </div>
+            <div class="text-center mt-8 p-6">
+                 <button id="downloadBtn" class="bg-green-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-transform transform hover:scale-105">
+                    Download Bill as Image
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const packageSelect = document.getElementById('internetPackage');
+        const totalBillInput = document.getElementById('totalBill');
+        const generateBtn = document.getElementById('generateBtn');
+        const billOutputContainer = document.getElementById('bill-output-container');
+        const errorMessageDiv = document.getElementById('error-message');
+        const errorTextSpan = document.getElementById('error-text');
+
+        function show_error(message) {
+            errorTextSpan.textContent = message;
+            errorMessageDiv.classList.remove('hidden');
+        }
+
+        // Generate Bill button logic
+        generateBtn.addEventListener('click', () => {
+            errorMessageDiv.classList.add('hidden'); // Hide previous errors
+            
+            // Get values from form
+            const customerName = document.getElementById('customerName').value;
+            const packageName = document.getElementById('internetPackage').value;
+            const billMonthInput = document.getElementById('billMonth').value;
+            const totalBill = document.getElementById('totalBill').value;
+            const billNote = document.getElementById('billNote').value.trim();
+
+            // Simple validation
+            if (!customerName || !packageName || !billMonthInput || !totalBill) {
+                show_error('Please fill all the required details to generate the bill.');
+                return;
+            }
+            
+            // Format dates
+            const billMonth = new Date(billMonthInput + '-02').toLocaleString('default', { month: 'long', year: 'numeric' });
+            const generationDate = new Date().toLocaleString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            // Populate the bill output
+            document.getElementById('outputCustomerName').textContent = customerName;
+            document.getElementById('outputBillMonth').textContent = billMonth;
+            document.getElementById('outputGenerationDate').textContent = generationDate;
+            
+            document.getElementById('outputPackage').textContent = `Internet Package (${packageName} Mbps)`;
+            const formattedAmount = `Rs. ${parseInt(totalBill).toLocaleString()}`;
+            document.getElementById('outputAmount').textContent = formattedAmount;
+            document.getElementById('outputTotal').textContent = formattedAmount;
+
+            // Handle Note
+            const noteSection = document.getElementById('outputNoteSection');
+            if (billNote) {
+                document.getElementById('outputNote').textContent = billNote;
+                noteSection.classList.remove('hidden');
+            } else {
+                noteSection.classList.add('hidden');
+            }
+            
+            // Show the bill
+            billOutputContainer.classList.remove('hidden');
+            billOutputContainer.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Download button logic
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const billOutput = document.getElementById('bill-output');
+            const customerName = document.getElementById('customerName').value.replace(/ /g, '_') || 'bill';
+            const billMonth = document.getElementById('billMonth').value || new Date().toISOString().slice(0, 7);
+
+            html2canvas(billOutput, {
+                scale: 2.5, // for better quality
+                useCORS: true, // This is still good to have
+                allowTaint: true // Helps with cross-origin images
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Bill_${customerName}_${billMonth}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        });
+
+    </script>
+</body>
+</html>
+
